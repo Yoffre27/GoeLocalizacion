@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: geochavin
+      MYSQL_USER: geochavin
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD in .env}
+    volumes:
+      - geochavin-db:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          MYSQL_PWD="$${MYSQL_PASSWORD}" mysql -h 127.0.0.1
+          -u "$${MYSQL_USER}" -D "$${MYSQL_DATABASE}"
+          -Nse 'SELECT 1 FROM roles LIMIT 1'
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  web:
+    image: geochavin-php:local
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      DB_HOST: db
+      DB_NAME: geochavin
+      DB_USER: geochavin
+      DB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD in .env}
+      SESSION_SECURE: "false"
+    healthcheck:
+      test: ["CMD", "php", "-r", "$$d=json_decode(@file_get_contents('http://127.0.0.1:8080/?page=api'),true);exit(($$d['type']??'')==='FeatureCollection'?0:1);"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  geochavin-db:
