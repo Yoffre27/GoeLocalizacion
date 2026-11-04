@@ -1,0 +1,5 @@
+.git
+.env
+config.local.php
+storage/*
+node_modules

@@ -1,0 +1,8 @@
+/config.local.php
+/.env
+/storage/*
+!/storage/.gitkeep
+/node_modules/
+
+__pycache__/
+*.py[cod]
