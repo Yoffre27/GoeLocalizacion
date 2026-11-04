@@ -7,6 +7,7 @@ def sql(text):run(['docker','compose','exec','-T','db','sh','-c','MYSQL_PWD="$MY
 # No destruir una base preexistente: el CREATE sin IF NOT EXISTS debe tener éxito.
 sql('CREATE DATABASE geochavin_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;')
 name='geochavin-test-'+secrets.token_hex(4)
+failure_name=name+'-outage'
 password=secrets.token_urlsafe(24)
 try:
  sql((ROOT/'database/schema.sql').read_text().replace('geochavin','geochavin_test'))
@@ -23,7 +24,7 @@ try:
  run(common+['geochavin-php:local','php','tests/database.php'])
  run(common+['geochavin-php:local','php','tests/fixtures.php'])
  run(common+['geochavin-php:local','php','bin/create-admin.php','cli.test@geochavin.invalid','Administrador CLI de prueba'])
- run(['docker','run','-d','--name',name,'--network',network,'--env-file',envfile,'-p','127.0.0.1:8081:8080','geochavin-php:local'],stdout=subprocess.DEVNULL)
+ run(['docker','run','-d','--name',name,'--network',network,'--env-file',envfile,'-p','127.0.0.1:8081:8080','geochavin-php:local','php','-S','0.0.0.0:8080','-t','public','tests/subdir-router.php'],stdout=subprocess.DEVNULL)
  opener=urllib.request.build_opener(urllib.request.ProxyHandler({}))
  for attempt in range(30):
   try:
@@ -32,10 +33,11 @@ try:
   except Exception:
    if attempt==29:raise
    time.sleep(1)
+ run(['docker','run','-d','--name',failure_name,'--network',network,'--env-file',envfile,'-e','DB_HOST=127.0.0.1','-e','DB_PORT=1','-p','127.0.0.1:8082:8080','geochavin-php:local'],stdout=subprocess.DEVNULL)
  env={**os.environ,'GEOCHAVIN_TEST_URL':'http://127.0.0.1:8081','GEOCHAVIN_TEST_PASSWORD':password}
  run(['python3','tests/smoke.py'],env=env)
  run(['python3','tests/browser.py'],env=env)
 finally:
- subprocess.run(['docker','rm','-f',name],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+ subprocess.run(['docker','rm','-f',name,failure_name],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
  sql('DROP DATABASE geochavin_test;')
  if 'envfile' in locals():os.unlink(envfile)

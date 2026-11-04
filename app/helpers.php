@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 function e(mixed $s): string {return htmlspecialchars((string)$s,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');}
-function url(string $path=''): string {return rtrim((string)setting('base_path'),'/').'/'.$path;}
+function url(string $path=''): string {return base_path().'/'.$path;}
 function redirect(string $path): never {header('Location: '.url($path),true,303);exit;}
 function csrf(): string { if(empty($_SESSION['csrf'])) $_SESSION['csrf']=bin2hex(random_bytes(32)); return '<input type="hidden" name="csrf" value="'.e($_SESSION['csrf']).'">'; }
 function check_csrf(): void {if(!is_string($_POST['csrf']??null)||!hash_equals($_SESSION['csrf']??'',$_POST['csrf'])) {http_response_code(403);throw new DomainException('La sesión del formulario venció. Recarga la página.');}}

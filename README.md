@@ -22,7 +22,7 @@ Sistema de geolocalización de atractivos turísticos de Chavín de Huántar, Hu
 
 ## XAMPP (resumen)
 
-Consulta [las instrucciones completas](docs/XAMPP.md). Copia el proyecto a `htdocs/geochavin`, inicia Apache/MySQL, importa `database/schema.sql` en phpMyAdmin, crea un usuario de aplicación con permisos limitados y copia `config.example.php` a `config.local.php`. Configura `base_path` como `/geochavin/public` y abre la carpeta pública con Apache. Crea el primer administrador mediante `bin/create-admin.php` con una contraseña propia; no hay credenciales predeterminadas.
+Consulta [las instrucciones completas](docs/XAMPP.md). Copia el proyecto a `htdocs/geochavin`, inicia Apache/MySQL, importa `database/schema.sql` en phpMyAdmin, crea un usuario de aplicación con permisos limitados y copia `config.example.php` a `config.local.php`. Deja `base_path` vacío para detectar automáticamente la carpeta pública y abre la carpeta pública con Apache. Crea el primer administrador mediante `bin/create-admin.php` con una contraseña propia; no hay credenciales predeterminadas.
 
 ## Entorno cloud actual
 

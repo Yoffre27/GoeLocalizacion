@@ -8,7 +8,7 @@ XAMPP con PHP 8.2 o superior y extensiones `pdo_mysql`, `mbstring`, sesiones y J
 2. Copia este proyecto a `C:\xampp\htdocs\geochavin`.
 3. En phpMyAdmin importa `database/schema.sql`. El script crea `geochavin` y sus 10 tablas, roles, categorías y una ficha pendiente sin coordenadas. Se puede reimportar sin borrar datos; no es un sistema de migraciones de futuras versiones.
 4. En phpMyAdmin crea un usuario de aplicación con contraseña propia, acceso a `geochavin.*` y permisos `SELECT`, `INSERT`, `UPDATE`, `DELETE`. Usa una cuenta distinta con DDL para instalación/migraciones. No ejecutes la aplicación como root.
-5. Copia `config.example.php` a `config.local.php`, en la raíz. Configura host `127.0.0.1`, puerto MySQL, base `geochavin`, usuario y contraseña. Establece `base_path` a `/geochavin/public`; en desarrollo HTTP `session_secure=false`.
+5. Copia `config.example.php` a `config.local.php`, en la raíz. Configura host `127.0.0.1`, puerto MySQL, base `geochavin`, usuario y contraseña. Deja `base_path` vacío para detectar automáticamente el nombre de la carpeta (incluido `GoeLocalizacion-geochavin/public`); en desarrollo HTTP `session_secure=false`.
 6. Como mínimo, protege las carpetas privadas: crea un VirtualHost con DocumentRoot `C:/xampp/htdocs/geochavin/public` (recomendado), usando `base_path=''` en ese caso. Si accedes por subcarpeta, añade en la configuración Apache reglas `Require all denied` para `app`, `bin`, `database`, `docs`, `storage`, `tests`, `.git`, y para `config.local.php`, `config.example.php`, `.env`, `compose.yaml`, `Dockerfile`. Verifica que esos archivos no son descargables. No confíes solo en que PHP ejecute el archivo de configuración.
 7. Crea el administrador en PowerShell, sin incluir la contraseña en el historial:
 
@@ -51,6 +51,13 @@ Añade `127.0.0.1 geochavin.local` al archivo hosts si utilizas ese nombre. El G
 6. Rutas: guarda el itinerario sin verificar, añade por «Puntos de ruta» al menos dos ubicaciones verificadas con órdenes únicos; después verifica el conjunto. La distancia entre paradas se identifica como línea recta, nunca como longitud de camino.
 7. Usuarios: solo administrador; selecciona rol editor o administrador. Para editar una cuenta, dejar contraseña vacía conserva el hash actual. No puedes desactivar/eliminar/degradar tu cuenta ni dejar sin administrador activo al sistema.
 8. Reportes: filtra fechas (hora de Perú) y exporta CSV. Los conteos son vistas de fichas por sesión/día, no visitas presenciales.
+
+## Si ves la página sin estilos y un error de inventario
+La URL de una descarga de GitHub puede ser `/GoeLocalizacion-geochavin/public/`; no es obligatorio renombrar la carpeta. La versión actual detecta ese prefijo automáticamente. Si configuraste manualmente otro `base_path`, déjalo vacío o hazlo coincidir exactamente con tu URL. Recarga con Ctrl+F5.
+
+Para MySQL, confirma que el servicio está iniciado y que importaste `database/schema.sql` desde phpMyAdmin. Debe existir `geochavin` con 10 tablas. Crea `config.local.php` copiando `config.example.php` y configura tu usuario/contraseña reales de MySQL; no existe automáticamente un usuario llamado `geochavin` solo por importar el esquema. Debes crearlo (paso 4) o usar la cuenta local que ya configuraste. No compartas contraseñas en el chat.
+
+Desde la raíz, `C:\xampp\php\php.exe bin\check-db.php` verifica extensiones, conexión y tablas sin imprimir credenciales. La captura de un error visual no permite distinguir por sí sola entre credenciales incorrectas, puerto distinto, extensión ausente o esquema sin importar.
 
 ## Resolución de problemas
 - HTTP 503: comprueba servicio MySQL, importación del esquema, host/puerto, credenciales y extensión PDO MySQL. Consulta el log del servidor; el navegador no expone mensajes internos.

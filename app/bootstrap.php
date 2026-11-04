@@ -6,11 +6,20 @@ function setting(string $key, mixed $default = ''): mixed {
  $value = getenv(strtoupper($key));
  return $value !== false ? $value : ($config[$key] ?? $default);
 }
+function base_path(): string {
+ $configured=trim((string)setting('base_path'));
+ if ($configured!=='') return '/'.trim($configured,'/');
+ // Apache/XAMPP expone SCRIPT_NAME con el directorio real del proyecto.
+ if (PHP_SAPI==='cli') return '';
+ $script=str_replace('\\','/',(string)($_SERVER['SCRIPT_NAME']??'/index.php'));
+ $directory=str_replace('\\','/',dirname($script));
+ return in_array($directory,['/','.'],true)?'':'/'.trim($directory,'/');
+}
 date_default_timezone_set('America/Lima');
 ini_set('display_errors','0');
 ini_set('session.use_strict_mode','1');
 session_name('geochavin_session');
-session_set_cookie_params(['httponly'=>true,'secure'=>filter_var(setting('session_secure',false), FILTER_VALIDATE_BOOLEAN),'samesite'=>'Lax','path'=>rtrim((string)setting('base_path'),'/').'/']);
+session_set_cookie_params(['httponly'=>true,'secure'=>filter_var(setting('session_secure',false), FILTER_VALIDATE_BOOLEAN),'samesite'=>'Lax','path'=>base_path().'/']);
 if (PHP_SAPI !== 'cli') session_start();
 require_once __DIR__.'/helpers.php';
 function db(): PDO {

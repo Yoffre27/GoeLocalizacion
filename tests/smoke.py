@@ -96,4 +96,21 @@ class Integration(unittest.TestCase):
   for entity,id in [('usuarios',user),('puntos_ruta',points[0]),('puntos_ruta',points[1]),('rutas_turisticas',route),('servicios_turisticos',service),('fotografias',photo),('atractivos_turisticos',a),('ubicaciones',locs[0]),('ubicaciones',locs[1])]:
    path='?page=admin&entity='+entity
    self.assertEqual(admin.req(path,{'csrf':admin.token(path),'action':'delete','id':str(id)})[0],200)
+ def test_14_xampp_subdirectory(self):
+  c=Client();prefix='GoeLocalizacion-geochavin/public/'
+  code,body,headers=c.req(prefix)
+  self.assertEqual(code,200);self.assertIn('href="/'+prefix+'assets/style.css"',body)
+  self.assertIn('src="/'+prefix+'assets/app.js"',body)
+  self.assertEqual(body.count('<!doctype html>'),1)
+  self.assertIn(('path=/'+prefix).lower(),headers.get('Set-Cookie','').lower())
+  code,css,headers=c.req(prefix+'assets/style.css');self.assertEqual(code,200);self.assertIn('text/css',headers['Content-Type']);self.assertIn('--green',css)
+  self.assertEqual(json.loads(c.req(prefix+'?page=api')[1])['type'],'FeatureCollection')
+ def test_15_database_outage_single_document(self):
+  opener=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+  try:opener.open('http://127.0.0.1:8082/',timeout=10);self.fail('Debía devolver 503')
+  except urllib.error.HTTPError as response:
+   body=response.read().decode();self.assertEqual(response.code,503)
+   self.assertEqual(body.count('<!doctype html>'),1)
+   self.assertEqual(body.count('class="site-header"'),1)
+   self.assertIn('No podemos consultar el inventario',body)
 if __name__=='__main__':unittest.main(verbosity=2)

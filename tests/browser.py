@@ -19,6 +19,10 @@ with sync_playwright() as pw:
   if width<500:
    toggle=page.get_by_role('button',name='Abrir navegación');toggle.click();assert toggle.get_attribute('aria-expanded')=='true';page.get_by_role('link',name='Explorar mapa',exact=True).click();assert page.locator('#mapa .leaflet-pane').count()>0
  print('PASS: inicio escritorio/móvil, menú responsive, Leaflet y ausencia de desbordamiento')
+ page.goto(TEST+'/GoeLocalizacion-geochavin/public/?page=explorar',wait_until='networkidle')
+ assert page.locator('#mapa .leaflet-pane').count()>0
+ assert page.locator('#map-results').inner_text().startswith('Aún no hay lugares')
+ print('PASS: CSS, JavaScript y Leaflet en la subcarpeta XAMPP')
  page.set_viewport_size({'width':1280,'height':900});page.goto(TEST+'/?page=explorar',wait_until='networkidle')
  assert page.locator('#map-results').inner_text().startswith('Aún no hay lugares')
  # Denegación de GPS: rama explícita del navegador, sin requerir un sensor real.
